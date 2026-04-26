@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>カウンター</title>
+    <style>
+        body {
+            text-align: center;
+            font-size: 24px;
+            margin-top: 50px;
+            margin-bottom: 50px;
+            margin-left: 50px;
+            margin-right: 50px;
+
+        }
+
+        button {
+            font-size: 24px;
+            padding: 10px 20px;
+            width: 200px;
+            height: 100px;
+        }
+
+        body {
+            background-color: rgb(59, 59, 59);
+            color: rgb(228, 228, 228);
+
+        }
+    </style>
+
+</head>
+
+<body>
+
+
+    <h1 onclick="countUp()">カウンターゲーム</h1>
+    <h2>現在: <span id="value">0</span></h2>
+    <h3>目標: <span id="target">0</span></h3>
+    <p>残り手数: <span id="steps">3</span></p>
+    <p>ポイント: <span id="point">0</span></p>
+    <p>失敗回数（※3連続失敗でゲームオーバー）: <span id="failCount">0</span></p>
+
+    <p id="message" style="color: rgb(196, 203, 245); height: 24px;"></p>
+
+    <button onclick="act('+1')">+1</button>
+    <button onclick="act('+10')">+10</button>
+    <button onclick="act('-1')">-1</button>
+    <button onclick="act('-10')">-10</button>
+    <button onclick="act('*2')">×2</button>
+    <button id="divBtn" onclick="act('/2')">÷2</button>
+    <button id="restartBtn" onclick="restartGame()" style="display:none;">リスタート</button>
+    <script>
+        let value = 0;
+        let target = 0;
+        let steps = 3;
+        let point = 0;
+        let failCount = 0;
+        let startValue = 0;
+        let startTarget = 0;
+        let isGameOver = false;
+
+        const ops = {
+            '+1': n => n + 1,
+            '+10': n => n + 10,
+            '-1': n => n - 1,
+            '-10': n => n - 10,
+            '*2': n => n * 2,
+            '/2': n => Math.floor(n / 2)
+        };
+        function getMaxSteps() {
+            return point > 10 ? 4 : 3;
+        }
+        // 🔥 現在値から逆算して目標生成
+        let isOniMode = false;
+
+        function generateStage() {
+            let wasOni = isOniMode;
+            isOniMode = point > 10;
+
+            if (!wasOni && isOniMode) {
+                showMessage("👹 鬼モード！", true);
+            }
+
+            steps = getMaxSteps();
+            startValue = value;
+
+            let prevTarget = target;
+            let maxTry = 100;
+            let success = false;
+
+            for (let attempt = 0; attempt < maxTry; attempt++) {
+
+                let v = value;
+
+                for (let i = 0; i < getMaxSteps(); i++) {
+                    let keys = Object.keys(ops);
+
+                    let validKeys = keys.filter(k => {
+                        if (k === '/2') return v % 2 === 0;
+                        return true;
+                    });
+
+                    let op = validKeys[Math.floor(Math.random() * validKeys.length)];
+                    v = ops[op](v);
+                }
+
+                if (v >= 0 && v <= 100) {
+                    target = v;
+                    success = true;
+                    break;
+                }
+            }
+
+            if (!success) {
+                if (prevTarget >= 0) {
+                    target = prevTarget - 21;
+                } else {
+                    target = prevTarget + 21;
+                }
+            }
+
+            target = Math.max(0, Math.min(100, target));
+            startTarget = target;
+        }
+
+        // 操作
+        function act(type) {
+            if (steps <= 0 || isGameOver) return;
+
+            if (type === '/2' && value % 2 !== 0) return;
+
+            value = ops[type](value);
+            steps--;
+
+            if (steps === 0) {
+                if (value === target) {
+                    point++;
+                    failCount = 0;
+                    showMessage("成功！");
+
+                    generateStage();
+
+                    steps = getMaxSteps(); // ←これ追加（重要）
+
+                } else {
+                    failCount++;
+                    showMessage("失敗");
+
+                    // 🔥 巻き戻し
+                    value = startValue;
+                    target = startTarget;
+
+                    if (failCount >= 3) {
+                        gameOver();
+                        return;
+                    }
+
+                    steps = getMaxSteps(); // ←ここ
+                }
+            }
+
+            update();
+        }
+
+        function gameOver() {
+            isGameOver = true;
+            showMessage("ゲームオーバー");
+
+            document.getElementById("restartBtn").style.display = "inline-block";
+        }
+
+        function restartGame() {
+            value = 0;
+            point = 0;
+            failCount = 0;
+            isGameOver = false;
+
+            generateStage();
+            update();
+
+            document.getElementById("restartBtn").style.display = "none";
+        }
+
+        // 🔥 メッセージ表示（1.5秒）
+        let messageTimer = null;
+
+        function showMessage(text, isPersistent = false) {
+            let msg = document.getElementById("message");
+
+            // 既存タイマーを止める
+            if (messageTimer) {
+                clearTimeout(messageTimer);
+                messageTimer = null;
+            }
+
+            msg.textContent = text;
+
+            if (!isPersistent) {
+                messageTimer = setTimeout(() => {
+                    msg.textContent = "";
+                    messageTimer = null;
+                }, 1500);
+            }
+        }
+
+        // 表示更新
+        function update() {
+            document.getElementById("value").textContent = value;
+            document.getElementById("target").textContent = target;
+            document.getElementById("steps").textContent = steps;
+            document.getElementById("point").textContent = point;
+            document.getElementById("failCount").textContent = failCount;
+            document.getElementById("divBtn").disabled = (value % 2 !== 0);
+            // 👹 鬼モード判定
+            if (point > 10) {
+                document.body.style.backgroundColor = "rgb(120, 30, 30)";
+            } else {
+                document.body.style.backgroundColor = "rgb(59, 59, 59)";
+            }
+
+
+        }
+
+        // 初期化
+        generateStage();
+        update();
+    </script>
+</body>
+
+</html>
