@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>計算ゲーム</title>
+    <title>カウンター</title>
     <style>
         body {
             text-align: center;
@@ -49,6 +49,16 @@
             padding: 30px;
             border-radius: 10px;
         }
+
+        #buttonArea {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            row-gap: 25px;
+            /* 行の間 */
+            column-gap: 10px;
+            /* 横の間 */
+            margin-top: 30px;
+        }
     </style>
 
 </head>
@@ -76,12 +86,15 @@
 
     <h2 id="message" style="color: rgb(112, 120, 228); height: 24px;"></h2>
 
-    <button onclick="act('+1')">+1</button>
-    <button onclick="act('+10')">+10</button>
-    <button onclick="act('-1')">-1</button>
-    <button onclick="act('-10')">-10</button>
-    <button onclick="act('*2')">×2</button>
-    <button id="divBtn" onclick="act('/2')">÷2</button>
+    <div id="buttonArea">
+        <button onclick="act('+1')">+1</button>
+        <button onclick="act('+10')">+10</button>
+        <button onclick="act('-1')">-1</button>
+
+        <button onclick="act('-10')">-10</button>
+        <button onclick="act('*2')">×2</button>
+        <button id="divBtn" onclick="act('/2')">÷2</button>
+    </div>
     <button id="restartBtn" onclick="restartGame()" style="display:none;">リスタート</button>
     <script>
         function startGame() {
