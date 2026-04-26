@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>カウンター</title>
+    <title>計算ゲーム</title>
     <style>
         body {
             text-align: center;
@@ -28,21 +28,53 @@
             color: rgb(228, 228, 228);
 
         }
+
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        #ruleBox {
+            text-align: center;
+            background: rgba(40, 40, 40, 0.9);
+            padding: 30px;
+            border-radius: 10px;
+        }
     </style>
 
 </head>
 
 <body>
+    <div id="overlay" onclick="startGame()">
+        <div id="ruleBox">
+            <h2>📜 ルール説明</h2>
+            <p>
+                ・ボタンを押して数値を操作する<br>
+                ・残り手数がゼロになった時点で目標値にぴったり合わせると成功<br>
+                ・通常は3手、11ポイント以上で鬼モード（4手）<br>
+                ・3回連続失敗でゲームオーバー
+            </p>
+            <p>👉 タップで開始</p>
+        </div>
+    </div>
 
-
-    <h1 onclick="countUp()">カウンターゲーム</h1>
+    <h1>計算ゲーム</h1>
     <h2>現在: <span id="value">0</span></h2>
     <h3>目標: <span id="target">0</span></h3>
     <p>残り手数: <span id="steps">3</span></p>
     <p>ポイント: <span id="point">0</span></p>
     <p>失敗回数（※3連続失敗でゲームオーバー）: <span id="failCount">0</span></p>
 
-    <p id="message" style="color: rgb(196, 203, 245); height: 24px;"></p>
+    <h2 id="message" style="color: rgb(112, 120, 228); height: 24px;"></h2>
 
     <button onclick="act('+1')">+1</button>
     <button onclick="act('+10')">+10</button>
@@ -52,6 +84,12 @@
     <button id="divBtn" onclick="act('/2')">÷2</button>
     <button id="restartBtn" onclick="restartGame()" style="display:none;">リスタート</button>
     <script>
+        function startGame() {
+            document.getElementById("overlay").style.display = "none";
+
+            // 念のため初期化（なくてもOKだけど安全）
+            restartGame();
+        }
         let value = 0;
         let target = 0;
         let steps = 3;
@@ -215,7 +253,7 @@
             document.getElementById("divBtn").disabled = (value % 2 !== 0);
             // 👹 鬼モード判定
             if (point > 10) {
-                document.body.style.backgroundColor = "rgb(120, 30, 30)";
+                document.body.style.backgroundColor = "rgb(100, 40, 40)";
             } else {
                 document.body.style.backgroundColor = "rgb(59, 59, 59)";
             }
