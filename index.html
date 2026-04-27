@@ -171,7 +171,7 @@
     <p>ポイント: <span id="point">0</span></p>
     <div id="status">
         <p>連続失敗回数: <span id="failCount">0</span></p>
-        <p>(※3連続失敗でゲームオーバー)</p>
+        <p>(※5連続失敗でゲームオーバー)</p>
     </div>
     <h2 id="message" style="color: rgb(112, 120, 228); height: 24px;"></h2>
 
@@ -347,7 +347,7 @@
 
                     steps = getMaxSteps();
 
-                    if (failCount >= 3) {
+                    if (failCount >= 5) {
                         gameOver();
                         return;
                     }
