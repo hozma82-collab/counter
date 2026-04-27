@@ -29,13 +29,14 @@
 
         }
 
+
         #overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.85);
+            background-color: rgba(97, 97, 97, 0.85);
             color: white;
             display: flex;
             justify-content: center;
@@ -59,6 +60,59 @@
             /* 横の間 */
             margin-top: 30px;
         }
+
+        #buttonArea button:active {
+            transform: scale(0.95);
+        }
+
+        /* フラッシュ共通（滑らかに戻る） */
+        body {
+            transition: background-color 0.15s;
+        }
+
+        /* 通常クリック */
+        .flash {
+            background-color: rgb(90, 90, 90) !important;
+        }
+
+        /* 成功（青） */
+        .flash-success {
+            background-color: rgb(70, 83, 105) !important;
+        }
+
+        /* 失敗（赤） */
+        .flash-fail {
+            background-color: rgb(110, 62, 62) !important;
+        }
+
+        #value {
+            display: inline-block;
+            /* ←これ重要（transform効かせる） */
+        }
+
+        /* 膨張アニメーション */
+        .bump {
+            animation: bump 0.15s ease;
+        }
+
+        @keyframes bump {
+            0% {
+                transform: scale(1);
+            }
+
+            40% {
+                transform: scale(1.4);
+            }
+
+            70% {
+                transform: scale(0.95);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+        }
     </style>
 
 </head>
@@ -68,10 +122,13 @@
         <div id="ruleBox">
             <h2>📜 ルール説明</h2>
             <p>
-                ・ボタンを押して数値を操作する<br>
-                ・残り手数がゼロになった時点で目標値にぴったり合わせると成功<br>
-                ・通常は3手、11ポイント以上で鬼モード（4手）<br>
-                ・3回連続失敗でゲームオーバー
+                ・ボタンを押して数値を操作する<br><br>
+                ・残り手数が<span style="color: rgb(138, 205, 214)">ゼロ</span>になった時点で<br>
+                目標値に<span style="color: rgb(138, 205, 214)">ぴったり</span>合わせると成功<br><br>
+                ・最初は<span style="color: rgb(138, 168, 214)">2手</span>、10ポイント以上で
+                <span style="color: rgb(180, 138, 214)">3手</span>、<br>
+                20ポイント以上で鬼モード（<span style="color: rgb(214, 138, 138)">4手</span>）<br><br>
+                ・<span style="color: rgb(214, 138, 167)">3回連続失敗</span>でゲームオーバー
             </p>
             <p>👉 タップで開始</p>
         </div>
@@ -96,6 +153,7 @@
         <button id="divBtn" onclick="act('/2')">÷2</button>
     </div>
     <button id="restartBtn" onclick="restartGame()" style="display:none;">リスタート</button>
+
     <script>
         function startGame() {
             document.getElementById("overlay").style.display = "none";
@@ -111,6 +169,8 @@
         let startValue = 0;
         let startTarget = 0;
         let isGameOver = false;
+        let currentPhase = 0;
+        // 0: 2手, 1: 3手, 2: 鬼モード
 
         const ops = {
             '+1': n => n + 1,
@@ -121,8 +181,54 @@
             '/2': n => Math.floor(n / 2)
         };
         function getMaxSteps() {
-            return point > 10 ? 4 : 3;
+            if (point >= 20) return 4;
+            if (point >= 10) return 3;
+            return 2;
         }
+        function bumpValue() {
+            const el = document.getElementById("value");
+
+            // 一回リセットしないと連続発火しない
+            el.classList.remove("bump");
+
+            // 強制再描画（これがミソ）
+            void el.offsetWidth;
+
+            el.classList.add("bump");
+        }
+
+        function flash(type) {
+            let body = document.body;
+
+            let className = "";
+            if (type === "success") className = "flash-success";
+            else if (type === "fail") className = "flash-fail";
+            else className = "flash";
+
+            body.classList.add(className);
+
+            setTimeout(() => {
+                body.classList.remove(className);
+            }, 150);
+        }
+        // フェーズ更新関数
+        function updatePhase() {
+            let newPhase = 0;
+
+            if (point >= 20) newPhase = 2;
+            else if (point >= 10) newPhase = 1;
+
+            if (newPhase !== currentPhase) {
+                currentPhase = newPhase;
+
+                if (newPhase === 1) {
+                    showOverlay("ここから手数は3手になります");
+                } else if (newPhase === 2) {
+                    showOverlay("👹 鬼モード突入！<br>ここから手数は4手になります");
+                }
+            }
+        }
+
         // 🔥 現在値から逆算して目標生成
         let isOniMode = false;
 
@@ -178,25 +284,32 @@
 
         // 操作
         function act(type) {
+
             if (steps <= 0 || isGameOver) return;
 
             if (type === '/2' && value % 2 !== 0) return;
 
             value = ops[type](value);
             steps--;
+            bumpValue();
 
             if (steps === 0) {
                 if (value === target) {
                     point++;
                     failCount = 0;
+
+                    flash("success"); // ←これ
                     showMessage("成功！");
 
-                    generateStage();
+                    updatePhase();
 
-                    steps = getMaxSteps(); // ←これ追加（重要）
+                    generateStage();
+                    steps = getMaxSteps();
 
                 } else {
                     failCount++;
+
+                    flash("fail"); // ←これ
                     showMessage("失敗");
 
                     // 🔥 巻き戻し
@@ -273,6 +386,18 @@
 
 
         }
+        function showOverlay(text) {
+            const overlay = document.getElementById("overlay");
+            const box = document.getElementById("ruleBox");
+
+            box.innerHTML = text;
+            overlay.style.display = "flex";
+        }
+
+        function closeOverlay() {
+            document.getElementById("overlay").style.display = "none";
+        }
+
 
         // 初期化
         generateStage();
