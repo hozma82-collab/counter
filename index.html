@@ -18,6 +18,7 @@
 
         button {
             font-size: 22px;
+            font-weight: 700;
             padding: 3px 7px;
             width: 75px;
             height: 37px;
@@ -87,7 +88,19 @@
 
         #value {
             display: inline-block;
+            font-weight: 900;
+            color: rgb(255, 255, 255);
+            text-shadow: 0 0 8px rgba(255, 219, 120, 0.678);
             /* ←これ重要（transform効かせる） */
+        }
+
+        #target {
+            color: rgba(192, 228, 255, 0.705);
+            text-shadow: 0 0 8px rgba(120, 180, 255, 0.8);
+        }
+
+        #failCount {
+            color: rgb(228, 95, 95);
         }
 
         /* 膨張アニメーション */
@@ -125,6 +138,10 @@
             border-radius: 12px;
             color: rgb(18, 67, 184);
         }
+
+        #status p {
+            margin: 4px 0;
+        }
     </style>
 
 </head>
@@ -152,8 +169,10 @@
     <h3>目標: <span id="target">0</span></h3>
     <p>残り手数: <span id="steps">3</span></p>
     <p>ポイント: <span id="point">0</span></p>
-    <p>失敗回数（※3連続失敗でゲームオーバー）: <span id="failCount">0</span></p>
-
+    <div id="status">
+        <p>連続失敗回数: <span id="failCount">0</span></p>
+        <p>(※3連続失敗でゲームオーバー)</p>
+    </div>
     <h2 id="message" style="color: rgb(112, 120, 228); height: 24px;"></h2>
 
     <div id="buttonArea">
