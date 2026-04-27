@@ -112,6 +112,18 @@
                 transform: scale(1);
             }
         }
+
+        #restartBtn {
+            position: fixed;
+            top: 60%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            font-weight: 900;
+            padding: 0px 0px;
+            width: 220px;
+            border-radius: 12px;
+            color: rgb(18, 67, 184);
         }
     </style>
 
@@ -153,14 +165,12 @@
         <button onclick="act('*2')">×2</button>
         <button id="divBtn" onclick="act('/2')">÷2</button>
     </div>
-    <button id="restartBtn" onclick="restartGame()" style="display:none;">リスタート</button>
+    <button id="restartBtn" onclick="restartGame()" style="display:none;">はじめから</button>
 
     <script>
         function startGame() {
             document.getElementById("overlay").style.display = "none";
 
-            // 念のため初期化（なくてもOKだけど安全）
-            restartGame();
         }
         let value = 0;
         let target = 0;
@@ -235,7 +245,7 @@
 
         function generateStage() {
             let wasOni = isOniMode;
-            isOniMode = point > 10;
+            isOniMode = point >= 20;
 
             if (!wasOni && isOniMode) {
                 showMessage("👹 鬼モード！", true);
@@ -299,13 +309,13 @@
                     point++;
                     failCount = 0;
 
-                    flash("success"); // ←これ
+                    flash("success");
                     showMessage("成功！");
 
-                    updatePhase();
+                    updatePhase();   // ←演出だけ
 
-                    generateStage();
-                    steps = getMaxSteps();
+                    generateStage(); // ←状態更新はここに集約
+
 
                 } else {
                     failCount++;
@@ -317,12 +327,14 @@
                     value = startValue;
                     target = startTarget;
 
+                    steps = getMaxSteps();
+
                     if (failCount >= 3) {
                         gameOver();
                         return;
                     }
 
-                    steps = getMaxSteps(); // ←ここ
+
                 }
             }
 
@@ -379,7 +391,7 @@
             document.getElementById("failCount").textContent = failCount;
             document.getElementById("divBtn").disabled = (value % 2 !== 0);
             // 👹 鬼モード判定
-            if (point > 10) {
+            if (point >= 20) {
                 document.body.style.backgroundColor = "rgb(100, 40, 40)";
             } else {
                 document.body.style.backgroundColor = "rgb(59, 59, 59)";
@@ -403,6 +415,8 @@
         // 初期化
         generateStage();
         update();
+
+
     </script>
 </body>
 
