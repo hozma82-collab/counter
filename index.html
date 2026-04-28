@@ -340,7 +340,7 @@
 
         function generateStage() {
             let wasOni = isOniMode;
-            isOniMode = point >= 20;
+            isOniMode = point >= 30;
 
             if (!wasOni && isOniMode) {
                 showMessage("👹 鬼モード！", true);
@@ -554,7 +554,7 @@
             document.getElementById("failCount").textContent = failCount;
             document.getElementById("divBtn").disabled = (value % 2 !== 0);
             // 👹 鬼モード判定
-            if (point >= 20) {
+            if (point >= 30) {
                 document.body.style.backgroundColor = "rgb(100, 40, 40)";
             } else {
                 document.body.style.backgroundColor = "rgb(59, 59, 59)";
