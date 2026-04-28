@@ -156,6 +156,7 @@
 </head>
 
 <body>
+
     <div id="overlay" onclick="startGame()">
         <div id="ruleBox">
             <h2>📜 ルール説明</h2>
@@ -164,9 +165,9 @@
                 残り手数が<span style="color: rgb(138, 205, 214)">ゼロ</span>になった時点で<br>
                 目標値と<span style="color: rgb(138, 205, 214)">ぴったり</span>だとクリア、<br>
                 1ポイントゲット<br><br>
-                残り手数は、最初は<span style="color: rgb(138, 168, 214)">2手</span>、<br>10ポイント以上で
+                残り手数は、最初は<span style="color: rgb(138, 168, 214)">2手</span>、<br>15ポイント以上で
                 <span style="color: rgb(180, 138, 214)">3手</span>、<br>
-                20ポイント以上で<span style="color: rgb(214, 138, 138)">4手</span>、<br>
+                30ポイント以上で<span style="color: rgb(214, 138, 138)">4手</span>、<br>
                 40ポイント以上で<span style="color: rgb(235, 87, 87)">5手</span>、<br>
                 50ポイント獲得で<span style="color: rgb(201, 223, 162)">クリア</span>、<br><br>
                 <span style="color: rgb(214, 138, 167)">5回連続失敗</span>でゲームオーバー
@@ -194,12 +195,11 @@
         <button onclick="act('-10')">-10</button>
         <button id="divBtn" onclick="act('/2')">÷2</button>
     </div>
-    <button id="restartBtn" onclick="restartGame()" style="display:none;">はじめから</button>
 
     <script>
         function startGame() {
-            document.getElementById("overlay").style.display = "none";
-
+            audioCtx.resume();
+            closeOverlay();
         }
         let value = 0;
         let target = 0;
@@ -212,6 +212,59 @@
         let currentPhase = 0;
         // 0: 2手, 1: 3手, 2: 鬼モード
 
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playTone(freq, duration = 0.12, type = "square", volume = 0.05) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = type;
+            osc.frequency.value = freq;
+
+            gain.gain.value = volume;
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start();
+
+            gain.gain.exponentialRampToValueAtTime(
+                0.0001,
+                audioCtx.currentTime + duration
+            );
+
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+
+        function sePush() { playTone(880, 0.05, "sine"); } //クリック音
+        function seSuccess() { playTone(880, 0.05, "sine"); setTimeout(() => playTone(1020, 0.1), 80); } //成功音
+        function seFail() { playTone(220, 0.5, "sine"); setTimeout(() => playTone(880, 0.1), 80); }//失敗音
+        function seGameOver() {
+            playTone(110, 0.15, "sawtooth");              // ブッ
+            setTimeout(() => playTone(110, 1, "sawtooth"), 150); // ブー
+        }
+        function seClear() {
+            playTone(392, 0.5, "sine", 0.05); setTimeout(() =>
+                playTone(494, 0.5, "sine", 0.1), 150); setTimeout(() =>
+                    playTone(523, 0.5, "sine", 0.12), 300); setTimeout(() =>
+                        playTone(392, 1, "sine", 0.05), 450); setTimeout(() =>
+                            playTone(494, 0.5, "sine", 0.1), 600); setTimeout(() =>
+                                playTone(523, 0.5, "sine", 0.12), 750); setTimeout(() =>
+                                    playTone(392, 1, "sine", 0.05), 900); setTimeout(() =>
+                                        playTone(494, 0.5, "sine", 0.1), 1050); setTimeout(() =>
+                                            playTone(523, 0.5, "sine", 0.12), 1200); setTimeout(() =>
+                                                playTone(392, 1, "sine", 0.05), 1350); setTimeout(() =>
+                                                    playTone(494, 0.5, "sine", 0.1), 1500); setTimeout(() =>
+                                                        playTone(523, 0.5, "sine", 0.12), 1650); setTimeout(() =>
+                                                            playTone(392, 1, "sine", 0.05), 1800); setTimeout(() =>
+                                                                playTone(494, 0.5, "sine", 0.1), 1950); setTimeout(() =>
+                                                                    playTone(523, 2, "sine", 0.12), 2100)
+                ;
+        }//クリア音
+        function sePhaseUp() { playTone(660, 0.1); setTimeout(() => playTone(990, 0.1), 100); setTimeout(() => playTone(1320, 0.15), 220); }//レベルアップ音
+
         const ops = {
             '+1': n => n + 1,
             '+10': n => n + 10,
@@ -222,8 +275,8 @@
         };
         function getMaxSteps() {
             if (point >= 40) return 5;
-            if (point >= 20) return 4;
-            if (point >= 10) return 3;
+            if (point >= 30) return 4;
+            if (point >= 15) return 3;
             return 2;
         }
         function bumpValue() {
@@ -257,12 +310,12 @@
             let newPhase = 0;
 
             if (point >= 40) newPhase = 3;
-            else if (point >= 20) newPhase = 2;
-            else if (point >= 10) newPhase = 1;
+            else if (point >= 30) newPhase = 2;
+            else if (point >= 15) newPhase = 1;
 
             if (newPhase !== currentPhase) {
                 currentPhase = newPhase;
-
+                sePhaseUp();
                 if (newPhase === 1) {
                     showOverlay("ここから手数は3手になります");
                 } else if (newPhase === 2) {
@@ -359,6 +412,7 @@
         function act(type) {
 
             if (steps <= 0 || isGameOver) return;
+            sePush();
 
             if (type === '/2' && value % 2 !== 0) return;
 
@@ -377,6 +431,7 @@
                     }
                     failCount = 0;
 
+                    seSuccess();
                     flash("success");
                     showMessage("成功！");
 
@@ -388,6 +443,7 @@
                 } else {
                     failCount++;
 
+                    seFail();
                     flash("fail"); // ←これ
                     showMessage("失敗");
 
@@ -411,15 +467,37 @@
 
         function gameOver() {
             isGameOver = true;
-            showMessage("ゲームオーバー");
+            seGameOver();
 
-            document.getElementById("restartBtn").style.display = "inline-block";
+            let rank = "";
+
+            if (point < 15) rank = "残念！";
+            else if (point < 30) rank = "いいね！";
+            else if (point < 40) rank = "やるね！";
+            else if (point < 45) rank = "すごい！";
+            else rank = "惜しい！";
+
+            showOverlay(`
+        <h2>ゲームオーバー</h2>
+        <p style="font-size:32px">${point}ポイント</p>
+        <p>${rank}</p>
+        <br>
+        <p style="font-size:14px;color:#ccc;">👉 タップでリスタート</p>
+    `, restartGame);
         }
+
 
         function gameClear() {
             isGameOver = true;
-            showOverlay("🏆 50ポイント達成！完全制覇！");
-            document.getElementById("restartBtn").style.display = "inline-block";
+            seClear();
+
+            showOverlay(`
+        <h2>🏆 完全制覇！</h2>
+        <p style="font-size:32px">${point}ポイント</p>
+        <p>あなたは計算王！</p>
+        <br>
+        <p style="font-size:14px;color:#ccc;">👉 タップで再挑戦</p>
+    `, restartGame);
         }
 
         function restartGame() {
@@ -427,12 +505,14 @@
             point = 0;
             failCount = 0;
             isGameOver = false;
+            currentPhase = 0;
+
+            closeOverlay();
 
             generateStage();
             update();
-
-            document.getElementById("restartBtn").style.display = "none";
         }
+
 
         // 🔥 メッセージ表示（1.5秒）
         let messageTimer = null;
@@ -473,12 +553,14 @@
 
 
         }
-        function showOverlay(text) {
+        function showOverlay(text, onTap = closeOverlay) {
             const overlay = document.getElementById("overlay");
             const box = document.getElementById("ruleBox");
 
             box.innerHTML = text;
             overlay.style.display = "flex";
+
+            overlay.onclick = onTap;
         }
 
         function closeOverlay() {
