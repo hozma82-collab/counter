@@ -221,9 +221,9 @@
             '/2': n => Math.floor(n / 2)
         };
         function getMaxSteps() {
-            if (point >= 40) newPhase = 3;
-            else if (point >= 20) newPhase = 2;
-            else if (point >= 10) newPhase = 1;
+            if (point >= 40) return 5;
+            if (point >= 20) return 4;
+            if (point >= 10) return 3;
             return 2;
         }
         function bumpValue() {
@@ -256,9 +256,9 @@
         function updatePhase() {
             let newPhase = 0;
 
-            if (point >= 20) newPhase = 2;
+            if (point >= 40) newPhase = 3;
+            else if (point >= 20) newPhase = 2;
             else if (point >= 10) newPhase = 1;
-            else if (point >= 40) newPhase = 3;
 
             if (newPhase !== currentPhase) {
                 currentPhase = newPhase;
