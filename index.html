@@ -158,7 +158,9 @@
                 1ポイントゲット<br><br>
                 残り手数は、最初は<span style="color: rgb(138, 168, 214)">2手</span>、<br>10ポイント以上で
                 <span style="color: rgb(180, 138, 214)">3手</span>、<br>
-                20ポイント以上で<span style="color: rgb(214, 138, 138)">4手</span>、<br><br>
+                20ポイント以上で<span style="color: rgb(214, 138, 138)">4手</span>、<br>
+                40ポイント以上で<span style="color: rgb(235, 87, 87)">5手</span>、<br>
+                50ポイント獲得で<span style="color: rgb(201, 223, 162)">クリア</span>、<br><br>
                 <span style="color: rgb(214, 138, 167)">5回連続失敗</span>でゲームオーバー
             </p>
             <p>👉 タップで開始</p>
@@ -168,7 +170,7 @@
     <h1>計算ゲーム</h1>
     <h2>現在: <span id="value">0</span></h2>
     <h3>目標: <span id="target">0</span></h3>
-    <h3>残り手数: <span id="steps">3</span></h3>
+    <h3>残り手数: <span id="steps">2</span></h3>
     <p>ポイント: <span id="point">0</span></p>
     <div id="status">
         <p>連続失敗回数: <span id="failCount">0</span></p>
@@ -211,8 +213,9 @@
             '/2': n => Math.floor(n / 2)
         };
         function getMaxSteps() {
-            if (point >= 20) return 4;
-            if (point >= 10) return 3;
+            if (point >= 40) newPhase = 3;
+            else if (point >= 20) newPhase = 2;
+            else if (point >= 10) newPhase = 1;
             return 2;
         }
         function bumpValue() {
@@ -247,6 +250,7 @@
 
             if (point >= 20) newPhase = 2;
             else if (point >= 10) newPhase = 1;
+            else if (point >= 40) newPhase = 3;
 
             if (newPhase !== currentPhase) {
                 currentPhase = newPhase;
@@ -255,6 +259,8 @@
                     showOverlay("ここから手数は3手になります");
                 } else if (newPhase === 2) {
                     showOverlay("👹 鬼モード突入！<br>ここから手数は4手になります");
+                } else if (newPhase === 3) {
+                    showOverlay("👹 最終段階！<br>ここから手数は5手になります");
                 }
             }
         }
@@ -274,7 +280,7 @@
             startValue = value;
 
             let prevTarget = target;
-            let maxTry = 100;
+            let maxTry = 500;
             let success = false;
 
             for (let attempt = 0; attempt < maxTry; attempt++) {
@@ -300,15 +306,22 @@
                 }
             }
 
-            if (!success) {
-                if (prevTarget >= 0) {
-                    target = prevTarget - 21;
-                } else {
-                    target = prevTarget + 21;
+            if (target > 100) {
+                if (steps === 3 || steps === 5) {
+                    target = prevTarget - 1;
+                } else if (steps === 2 || steps === 4) {
+                    target = prevTarget;
+                }
+
+            } else if (target < 0) {
+                if (steps === 3 || steps === 5) {
+                    target = prevTarget + 1;
+                } else if (steps === 2 || steps === 4) {
+                    target = prevTarget;
                 }
             }
 
-            target = Math.max(0, Math.min(100, target));
+
             startTarget = target;
         }
 
@@ -326,6 +339,12 @@
             if (steps === 0) {
                 if (value === target) {
                     point++;
+
+                    if (point >= 50) {
+                        gameClear();
+                        update();
+                        return;
+                    }
                     failCount = 0;
 
                     flash("success");
@@ -364,6 +383,12 @@
             isGameOver = true;
             showMessage("ゲームオーバー");
 
+            document.getElementById("restartBtn").style.display = "inline-block";
+        }
+
+        function gameClear() {
+            isGameOver = true;
+            showOverlay("🏆 50ポイント達成！完全制覇！");
             document.getElementById("restartBtn").style.display = "inline-block";
         }
 
