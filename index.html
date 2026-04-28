@@ -294,17 +294,39 @@
             for (let attempt = 0; attempt < maxTry; attempt++) {
 
                 let v = value;
+                let prevOp = null;
 
                 for (let i = 0; i < getMaxSteps(); i++) {
-                    let keys = Object.keys(ops);
 
-                    let validKeys = keys.filter(k => {
-                        if (k === '/2') return v % 2 === 0;
-                        return true;
+                    let weightedKeys = [];
+
+                    Object.keys(ops).forEach(k => {
+
+                        if (k === '/2' && v % 2 !== 0) return;
+
+                        // 逆操作禁止
+                        if (
+                            (prevOp === '+1' && k === '-1') ||
+                            (prevOp === '-1' && k === '+1') ||
+                            (prevOp === '+10' && k === '-10') ||
+                            (prevOp === '-10' && k === '+10') ||
+                            (prevOp === '*2' && k === '/2') ||
+                            (prevOp === '/2' && k === '*2')
+                        ) return;
+
+                        let weight = 1;
+                        if (k === '*2') weight = 2;
+                        if (k === '/2') weight = 3;
+
+                        for (let j = 0; j < weight; j++) {
+                            weightedKeys.push(k);
+                        }
                     });
 
-                    let op = validKeys[Math.floor(Math.random() * validKeys.length)];
+                    let op = weightedKeys[Math.floor(Math.random() * weightedKeys.length)];
+
                     v = ops[op](v);
+                    prevOp = op;
                 }
 
                 if (v >= 0 && v <= 100) {
