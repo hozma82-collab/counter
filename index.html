@@ -17,11 +17,17 @@
         }
 
         #valueTitle {
-            margin-bottom: 4px;
+            border: 2px solid #ffffff;
+            padding: 10px 16px;
+            display: inline-block;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0);
+            color: #fff;
+            margin-top: -20px;
         }
 
         #targetTitle {
-            margin-top: 4px;
+            margin-top: -20px;
         }
 
         button {
@@ -98,14 +104,13 @@
         #value {
             display: inline-block;
             font-weight: 900;
-            color: rgb(255, 255, 255);
-            text-shadow: 0 0 8px rgba(255, 219, 120, 0.678);
+            color: rgba(255, 255, 255, 0.925);
+
             /* ←これ重要（transform効かせる） */
         }
 
         #target {
             color: rgba(192, 228, 255, 0.705);
-            text-shadow: 0 0 8px rgba(120, 180, 255, 0.8);
         }
 
         #failCount {
@@ -246,21 +251,21 @@
             setTimeout(() => playTone(110, 1, "sawtooth"), 150); // ブー
         }
         function seClear() {
-            playTone(392, 0.5, "sine", 0.05); setTimeout(() =>
-                playTone(494, 0.5, "sine", 0.1), 150); setTimeout(() =>
-                    playTone(523, 0.5, "sine", 0.12), 300); setTimeout(() =>
-                        playTone(392, 1, "sine", 0.05), 450); setTimeout(() =>
-                            playTone(494, 0.5, "sine", 0.1), 600); setTimeout(() =>
-                                playTone(523, 0.5, "sine", 0.12), 750); setTimeout(() =>
-                                    playTone(392, 1, "sine", 0.05), 900); setTimeout(() =>
-                                        playTone(494, 0.5, "sine", 0.1), 1050); setTimeout(() =>
-                                            playTone(523, 0.5, "sine", 0.12), 1200); setTimeout(() =>
-                                                playTone(392, 1, "sine", 0.05), 1350); setTimeout(() =>
-                                                    playTone(494, 0.5, "sine", 0.1), 1500); setTimeout(() =>
-                                                        playTone(523, 0.5, "sine", 0.12), 1650); setTimeout(() =>
-                                                            playTone(392, 1, "sine", 0.05), 1800); setTimeout(() =>
-                                                                playTone(494, 0.5, "sine", 0.1), 1950); setTimeout(() =>
-                                                                    playTone(523, 2, "sine", 0.12), 2100)
+            playTone(392, 0.5, "sine", 0.5); setTimeout(() =>
+                playTone(494, 0.5, "sine", 1), 150); setTimeout(() =>
+                    playTone(523, 0.5, "sine", 1.2), 300); setTimeout(() =>
+                        playTone(392, 1, "sine", 0.5), 450); setTimeout(() =>
+                            playTone(494, 0.5, "sine", 1), 600); setTimeout(() =>
+                                playTone(523, 0.5, "sine", 1.2), 750); setTimeout(() =>
+                                    playTone(392, 1, "sine", 0.5), 900); setTimeout(() =>
+                                        playTone(494, 0.5, "sine", 1), 1050); setTimeout(() =>
+                                            playTone(523, 0.5, "sine", 1.2), 1200); setTimeout(() =>
+                                                playTone(392, 1, "sine", 0.5), 1350); setTimeout(() =>
+                                                    playTone(494, 0.5, "sine", 1), 1500); setTimeout(() =>
+                                                        playTone(523, 0.5, "sine", 1.2), 1650); setTimeout(() =>
+                                                            playTone(392, 1, "sine", 0.5), 1800); setTimeout(() =>
+                                                                playTone(494, 0.5, "sine", 1), 1950); setTimeout(() =>
+                                                                    playTone(523, 2, "sine", 1.2), 2100)
                 ;
         }//クリア音
         function sePhaseUp() { playTone(660, 0.1); setTimeout(() => playTone(990, 0.1), 100); setTimeout(() => playTone(1320, 0.15), 220); }//レベルアップ音
