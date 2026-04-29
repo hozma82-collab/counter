@@ -543,7 +543,7 @@
 ${getAnswerFormula()}
 
 <h4>👉 タップでリスタート</h4>
-`, restartGame);
+`, restartGame, 1000);
         }
 
         function gameClear() {
@@ -612,16 +612,21 @@ ${getAnswerFormula()}
 
 
         }
-        function showOverlay(text, onTap = closeOverlay) {
+        function showOverlay(text, onTap = closeOverlay, delay = 0) {
             const overlay = document.getElementById("overlay");
             const box = document.getElementById("ruleBox");
 
             box.innerHTML = text;
             overlay.style.display = "flex";
 
-            overlay.onclick = onTap;
-        }
+            overlay.onclick = null;
+            overlay.style.pointerEvents = "none";
 
+            setTimeout(() => {
+                overlay.style.pointerEvents = "auto";
+                overlay.onclick = onTap;
+            }, delay);
+        }
         function closeOverlay() {
             document.getElementById("overlay").style.display = "none";
         }
