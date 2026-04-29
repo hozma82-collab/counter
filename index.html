@@ -260,17 +260,8 @@
                     playTone(523, 0.5, "sine", 1.2), 300); setTimeout(() =>
                         playTone(392, 1, "sine", 0.5), 450); setTimeout(() =>
                             playTone(494, 0.5, "sine", 1), 600); setTimeout(() =>
-                                playTone(523, 0.5, "sine", 1.2), 750); setTimeout(() =>
-                                    playTone(392, 1, "sine", 0.5), 900); setTimeout(() =>
-                                        playTone(494, 0.5, "sine", 1), 1050); setTimeout(() =>
-                                            playTone(523, 0.5, "sine", 1.2), 1200); setTimeout(() =>
-                                                playTone(392, 1, "sine", 0.5), 1350); setTimeout(() =>
-                                                    playTone(494, 0.5, "sine", 1), 1500); setTimeout(() =>
-                                                        playTone(523, 0.5, "sine", 1.2), 1650); setTimeout(() =>
-                                                            playTone(392, 1, "sine", 0.5), 1800); setTimeout(() =>
-                                                                playTone(494, 0.5, "sine", 1), 1950); setTimeout(() =>
-                                                                    playTone(523, 2, "sine", 1.2), 2100)
-                ;
+                                playTone(523, 2, "sine", 1.2), 750);
+
         }//クリア音
         function sePhaseUp() { playTone(660, 0.1); setTimeout(() => playTone(990, 0.1), 100); setTimeout(() => playTone(1320, 0.15), 220); }//レベルアップ音
 
@@ -375,6 +366,9 @@
                             (prevOp === '*2' && k === '/2') ||
                             (prevOp === '/2' && k === '*2')
                         ) return;
+
+                        // ★30pt以上では同じ操作2連続禁止
+                        if (point >= 30 && prevOp === k) return;
 
                         let weight = 1;
                         if (k === '*2') weight = 2;
