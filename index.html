@@ -20,6 +20,16 @@
             margin-top: 8px;
         }
 
+        h4 {
+            text-align: center;
+            font-size: 18px;
+            margin-top: 8px;
+            margin-bottom: 8px;
+            margin-left: 18px;
+            margin-right: 18px;
+        }
+
+
         #valueTitle {
             border: 2px solid #ffffff;
             padding: 10px 16px;
@@ -160,6 +170,36 @@
         #status p {
             margin: 4px 0;
         }
+
+        .answerRoute {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .answerBtn {
+            font-size: 22px;
+            font-weight: 700;
+            width: 75px;
+            height: 37px;
+            opacity: 1;
+            color: #222;
+            background: #ddd;
+            border: 1px solid #888;
+            border-radius: 6px;
+        }
+
+        .answerBtn:disabled {
+            opacity: 1;
+            color: #222;
+        }
+
+        .answerNum {
+            font-size: 28px;
+            font-weight: 900;
+        }
     </style>
 
 </head>
@@ -212,14 +252,15 @@
         }
         let value = 0;
         let target = 0;
-        let steps = 3;
+        let steps = 2;
         let point = 0;
         let failCount = 0;
         let startValue = 0;
         let startTarget = 0;
         let isGameOver = false;
         let currentPhase = 0;
-        // 0: 2手, 1: 3手, 2: 鬼モード
+        // 0: 2手, 1: 3手, 2: 鬼モード, 4: 5手
+        let answerSteps = [];
 
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -341,13 +382,15 @@
             startValue = value;
 
             let prevTarget = target;
-            let maxTry = 500;
+            let maxTry = 5000;
             let success = false;
 
             for (let attempt = 0; attempt < maxTry; attempt++) {
 
                 let v = value;
                 let prevOp = null;
+
+                let route = [];
 
                 for (let i = 0; i < getMaxSteps(); i++) {
 
@@ -381,35 +424,45 @@
 
                     let op = weightedKeys[Math.floor(Math.random() * weightedKeys.length)];
 
+                    route.push(op);
                     v = ops[op](v);
                     prevOp = op;
+
+
+
                 }
 
                 if (v >= 0 && v <= 100) {
                     target = v;
+                    answerSteps = route;
                     success = true;
                     break;
                 }
             }
-
-            if (target > 100) {
-                if (steps === 3 || steps === 5) {
-                    target = prevTarget - 1;
-                } else if (steps === 2 || steps === 4) {
-                    target = prevTarget;
-                }
-
-            } else if (target < 0) {
-                if (steps === 3 || steps === 5) {
-                    target = prevTarget + 1;
-                } else if (steps === 2 || steps === 4) {
-                    target = prevTarget;
-                }
-            }
-
-
             startTarget = target;
         }
+        function getAnswerFormula() {
+            let html = `<div class="answerRoute">`;
+            html += `<div class="answerNum">${startValue}</div>`;
+
+            for (let op of answerSteps) {
+                let label = op
+                    .replace("*", "×")
+                    .replace("/", "÷");
+
+                html += `<button class="answerBtn" disabled>${label}</button>`;
+            }
+
+            html += `<div class="answerNum">＝${target}</div>`;
+            html += `</div>`;
+
+            return html;
+        }
+
+
+
+
+
 
         // 操作
         function act(type) {
@@ -481,14 +534,15 @@
             else rank = "惜しい！";
 
             showOverlay(`
-        <h2>ゲームオーバー</h2>
-        <p style="font-size:32px">${point}ポイント</p>
-        <p>${rank}</p>
-        <br>
-        <p style="font-size:14px;color:#ccc;">👉 タップでリスタート</p>
-    `, restartGame);
-        }
+<h4>ゲームオーバー</h4>
+<h4 style="font-size:26px">${point}ポイント</h4>
+<p>${rank}</p>
 
+${getAnswerFormula()}
+
+<h4>👉 タップでリスタート</h4>
+`, restartGame);
+        }
 
         function gameClear() {
             isGameOver = true;
